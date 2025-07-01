@@ -1,0 +1,8 @@
+---
+- name: Test du module command avec grep
+  hosts: client1
+  become: yes
+
+  tasks:
+    - name: Chercher "root" dans /etc/passwd avec le module command
+      ansible.builtin.command: grep root /etc/passw

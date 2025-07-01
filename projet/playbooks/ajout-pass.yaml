@@ -1,0 +1,11 @@
+---
+- name: Modifier le mot de passe de l’utilisateur Pierre
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Mettre à jour le mot de passe de Pierre
+      ansible.builtin.user:
+        name: Pierre
+        password: "{{ newpass | password_hash('sha512') }}"

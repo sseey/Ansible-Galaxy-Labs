@@ -1,0 +1,10 @@
+---
+- name: Modifier les permissions du fichier /root/vinci
+  hosts: client1,client2
+  become: yes
+
+  tasks:
+    - name: Ajouter les permissions d'écriture pour tous les utilisateurs sur /root/vinci
+      ansible.builtin.file:
+        path: /root/vinci
+        mode: '0666'

@@ -1,0 +1,8 @@
+---
+- name: Test du module shell avec pipe
+  hosts: client1
+  become: yes
+
+  tasks:
+    - name: Exécuter "cat /etc/passwd | grep root" avec le module shell
+      ansible.builtin.shell: cat /etc/passwd | grep root

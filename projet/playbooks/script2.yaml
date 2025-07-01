@@ -1,0 +1,8 @@
+---
+- name: Transférer et exécuter un script shell sur les machines distantes
+  hosts: client1
+  become: yes
+
+  tasks:
+    - name: Transférer et exécuter /root/script2.sh
+      ansible.builtin.script: /root/script2.sh
