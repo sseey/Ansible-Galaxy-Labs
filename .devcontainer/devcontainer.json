@@ -1,0 +1,15 @@
+{
+  "name": "Ansible Devcontainer",
+  "dockerComposeFile": "../docker-compose.yaml",
+  "service": "ansible",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [2222, 80],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  },
+  "remoteUser": "root"
+}

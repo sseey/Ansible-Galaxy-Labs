@@ -1,0 +1,70 @@
+---
+
+services:
+  ansible:
+    hostname: ansible
+    image: ftutorials/ubuntu-ansible:1.0
+    container_name: ansible
+    ports:
+      - "2222:22"
+      - "80:80"
+    volumes:
+      - ./projet:/root/projet
+    networks:
+      - ansible_net
+
+  client1:
+    hostname: client1
+    image: ftutorials/ubuntu-ssh:1.0
+    container_name: client1
+    ports:
+      - "2223:22"
+      - "3003:3000" 
+      - "8083:80" 
+    networks:
+      - ansible_net
+
+  client2:
+    hostname: client2
+    image: ftutorials/ubuntu-ssh:1.0
+    container_name: client2
+    ports:
+      - "2224:22"
+      - "3004:3000"
+      - "8084:80" 
+    networks:
+      - ansible_net
+
+  client3:
+    hostname: client3
+    image: ftutorials/rocky-ssh:1.0
+    container_name: client3
+    ports:
+      - "2225:22"
+      - "3005:3000"
+      - "8085:80" 
+    networks:
+      - ansible_net
+
+  client4:
+    hostname: client4
+    image: ftutorials/rocky-ssh:1.0
+    container_name: client4
+    ports:
+      - "2226:22"
+      - "3006:3000"
+      - "8086:80" 
+    networks:
+      - ansible_net
+
+  quiz-ansible:
+    image: ftutorials/quiz:ansible-1
+    container_name: quiz-ansible
+    ports:
+      - "3000:3000"
+    networks:
+      - ansible_net
+
+networks:
+  ansible_net:
+    driver: bridge

@@ -1,0 +1,61 @@
+# === Fichiers VS Code ===
+.vscode/
+
+# === Fichiers temporaires système ===
+*.swp
+*.swo
+*.tmp
+*.bak
+*~
+
+# === Fichiers Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# === Ansible ===
+
+# Inventaires sensibles
+inventory/
+hosts
+
+# Dossiers de sortie ou résultats
+*.retry
+*.tar.gz
+*.zip
+*.gz
+
+# Variables sensibles
+group_vars/
+host_vars/
+
+# Vault files
+*.vault.yml
+*.vault
+
+# Clés SSH
+*.pem
+*.key
+*.pub
+.ssh/
+
+# Fichiers de rôles générés par `ansible-galaxy init`
+roles/**/meta/.galaxy_install_info
+roles/**/.git
+roles/**/.cache
+
+# === Docker ===
+*.pid
+docker-compose.override.yml
+.env
+.env.*
+
+# === Logs ou journaux de test ===
+logs/
+*.log
+
+# === Fichiers OS ===
+.DS_Store
+Thumbs.db

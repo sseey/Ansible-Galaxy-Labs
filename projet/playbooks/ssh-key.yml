@@ -1,0 +1,10 @@
+---
+- name: Déployer la clé publique SSH sur tous les clients
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Copier la clé publique dans authorized_keys de root
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"

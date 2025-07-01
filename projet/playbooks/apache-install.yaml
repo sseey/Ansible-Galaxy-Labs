@@ -1,0 +1,23 @@
+---
+- name: Installer Apache2
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Mettre à jour la liste des paquets (apt)
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Vérifier si apache2 est installé
+      ansible.builtin.package:
+        name: apache2
+        state: present
+
+    - name: Vérifier la version d'apache2
+      ansible.builtin.command: apache2 -v
+      register: apache_version
+      ignore_errors: yes
+
+    - name: Afficher la version d'apache2
+      ansible.builtin.debug:
+        var: apache_version.stdout

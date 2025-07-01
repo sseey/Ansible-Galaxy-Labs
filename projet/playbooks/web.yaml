@@ -1,0 +1,21 @@
+---
+- import_playbook: apache-install.yaml
+
+- name: Démarrer et vérifier le service Apache2
+  hosts: localhost
+  become: true
+  tasks:
+    - name: S'assurer que le service apache2 est démarré et activé
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: true
+
+    - name: Vérifier l'état du service apache2 (compatible conteneur)
+      ansible.builtin.shell: ps aux | grep '[a]pache2'
+      register: apache2_status
+      ignore_errors: yes
+
+    - name: Afficher l'état du service apache2
+      ansible.builtin.debug:
+        var: apache2_status.stdout

@@ -1,0 +1,10 @@
+---
+- name: Test de connectivité et affichage Hello World
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Ping localhost
+      ansible.builtin.ping:
+    - name: Afficher Hello World
+      ansible.builtin.debug:
+        msg: "Hello World"
