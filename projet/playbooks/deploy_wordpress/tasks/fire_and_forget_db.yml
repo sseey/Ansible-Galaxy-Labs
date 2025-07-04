@@ -1,0 +1,32 @@
+---
+- name: Start MariaDB service (systemd)
+  service:
+    name: "{{ (ansible_os_family == 'Debian') | ternary('mysql','mariadb') }}"
+    state: started
+  when: ansible_service_mgr == 'systemd'
+
+- name: Initialiser le datadir MariaDB si nécessaire (non-systemd)
+  shell: mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+  args:
+    creates: /var/lib/mysql/mysql/db.frm
+  when: ansible_service_mgr != 'systemd'
+
+- name: Start MariaDB in background for container (non-systemd)
+  shell: mysqld_safe --datadir=/var/lib/mysql &
+  async: 3200
+  poll: 0
+  when: ansible_service_mgr != 'systemd'
+
+- name: Wait for MariaDB socket on Debian/Ubuntu
+  wait_for:
+    path: /run/mysqld/mysqld.sock
+    state: started
+    timeout: 120
+  when: ansible_pkg_mgr == 'apt'
+
+- name: Wait for MariaDB socket on Rocky/CentOS
+  wait_for:
+    path: /var/lib/mysql/mysql.sock
+    state: started
+    timeout: 120
+  when: ansible_pkg_mgr == 'dnf'

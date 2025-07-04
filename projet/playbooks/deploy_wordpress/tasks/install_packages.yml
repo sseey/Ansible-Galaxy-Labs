@@ -1,0 +1,6 @@
+---
+- name: Install required packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ (ansible_os_family == 'Debian') | ternary(debian_packages, rhel_packages) }}"

@@ -1,0 +1,21 @@
+---
+# Distribution-specific package lists
+debian_packages:
+  - apache2
+  - mariadb-server
+  - php
+  - php-mysql
+  - wget
+  - unzip
+  - python3-pip
+  - python3-pymysql
+
+rhel_packages:
+  - httpd
+  - mariadb-server
+  - php
+  - php-mysqlnd
+  - wget
+  - unzip
+  - python3-pip
+  - python3-PyMySQL

@@ -1,0 +1,20 @@
+---
+- name: Download WordPress
+  get_url:
+    url: "{{ wp_download_url }}"
+    dest: /tmp/wordpress.tar.gz
+    mode: '0644'
+
+- name: Unarchive WordPress
+  unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: "{{ wp_site_path }}"
+    remote_src: yes
+
+- name: Set permissions
+  file:
+    path: "{{ wp_site_path }}"
+    recurse: yes
+    owner: www-data
+    group: www-data
+    mode: '0755'

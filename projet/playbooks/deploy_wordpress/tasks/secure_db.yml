@@ -1,0 +1,34 @@
+---
+- name: Attendre que le socket MariaDB soit disponible
+  wait_for:
+    path: "{{ mariadb_socket }}"
+    state: present
+    timeout: 60
+
+- name: Configurer le mot de passe root MariaDB (tous OS)
+  mysql_user:
+    login_unix_socket: "{{ mariadb_socket }}"
+    check_implicit_admin: yes
+    user: root
+    host: localhost
+    plugin: mysql_native_password
+    password: "{{ wp_db_root_password }}"
+    state: present
+  ignore_errors: yes
+
+- name: Supprimer les utilisateurs anonymes
+  mysql_user:
+    login_unix_socket: "{{ mariadb_socket }}"
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    user: ""
+    host_all: true
+    state: absent
+
+- name: Supprimer la base de test par défaut
+  mysql_db:
+    login_unix_socket: "{{ mariadb_socket }}"
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    name: test
+    state: absent

@@ -1,0 +1,22 @@
+---
+- name: Deploy Apache vhost for WordPress
+  template:
+    src: wordpress.conf.j2
+    dest: /etc/{{ (ansible_os_family == 'Debian') | ternary('apache2/sites-available','httpd/conf.d') }}/wordpress.conf
+    mode: '0644'
+  notify:
+    - restart apache
+
+- name: Enable site (Debian)
+  command: a2ensite wordpress.conf
+  args:
+    removes: /etc/apache2/sites-enabled/wordpress.conf
+  when: ansible_os_family == 'Debian'
+  notify:
+    - restart apache
+
+- name: Enable rewrite module (Debian)
+  command: a2enmod rewrite
+  when: ansible_os_family == 'Debian'
+  notify:
+    - restart apache

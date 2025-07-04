@@ -1,0 +1,6 @@
+---
+- name: Deploy wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: "{{ wp_site_path }}/wp-config.php"
+    mode: '0644'

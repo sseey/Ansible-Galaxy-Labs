@@ -1,0 +1,13 @@
+<VirtualHost *:{{ apache_listen_port }}>
+    ServerAdmin {{ wp_admin_email | default('webmaster@localhost') }}
+    DocumentRoot {{ wp_site_path }}
+
+    <Directory {{ wp_site_path }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/wordpress_error.log
+    CustomLog ${APACHE_LOG_DIR}/wordpress_access.log combined
+</VirtualHost>

@@ -1,0 +1,10 @@
+---
+- name: restart apache
+  service:
+    name: "{{ (ansible_os_family == 'Debian') | ternary('apache2','httpd') }}"
+    state: restarted
+
+- name: restart mariadb
+  service:
+    name: mariadb
+    state: restarted

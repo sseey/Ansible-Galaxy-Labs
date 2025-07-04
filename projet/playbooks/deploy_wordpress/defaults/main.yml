@@ -1,0 +1,11 @@
+---
+# Default configurable variables for deploy_wordpress
+wp_db_name: wordpress
+wp_db_user: example
+wp_db_password: examplePW
+wp_db_root_password: rootExamplePW
+wp_download_url: https://wordpress.org/latest.zip
+wp_site_path: /var/www/html/wordpress
+apache_listen_port: 80
+
+mariadb_socket: "{{ ansible_pkg_mgr == 'apt' | ternary('/run/mysqld/mysqld.sock','/var/lib/mysql/mysql.sock') }}"

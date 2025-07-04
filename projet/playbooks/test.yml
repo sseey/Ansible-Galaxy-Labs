@@ -1,0 +1,13 @@
+---
+- name: Test deployment WordPress sur multi-OS
+  hosts: all
+  become: yes
+  vars:
+    ansible_user: root
+  roles:
+    - role: deploy_wordpress
+  tasks:
+    - name: Vérifier que WordPress est déployé
+      uri:
+        url: "http://{{ inventory_hostname }}:{{ apache_listen_port }}"
+        status_code: 200

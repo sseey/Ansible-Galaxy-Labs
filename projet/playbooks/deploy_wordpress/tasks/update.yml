@@ -1,0 +1,13 @@
+---
+# tasks/update.yml
+
+- name: Update apt cache (Debian/Ubuntu)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600      # ne refait l'update que si le cache a plus d’1h
+  when: ansible_pkg_mgr == 'apt'
+
+- name: Update dnf cache (Rocky/CentOS)
+  dnf:
+    update_cache: yes
+  when: ansible_pkg_mgr == 'dnf'

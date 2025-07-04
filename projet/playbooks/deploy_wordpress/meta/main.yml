@@ -1,0 +1,25 @@
+---
+# Metadata for deploy_wordpress role
+galaxy_info:
+  author: SMAIL Hicham
+  description: "Rôle Ansible pour déployer WordPress avec MariaDB sur Ubuntu et Rocky Linux"
+  company: SDV
+  license: MIT
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - jammy
+    - name: Rocky
+      versions:
+        - '8'
+        - '9'
+  galaxy_tags:
+    - wordpress
+    - mariadb
+    - webserver
+    - ubuntu
+    - rocky
+dependencies: []
