@@ -1,0 +1,13 @@
+---
+- name: Récupérer et afficher l’uptime des machines Ubuntu/Debian
+  hosts: ubuntu  # ou debian, ou un groupe spécifique à adapter selon ton inventaire
+  become: true
+
+  tasks:
+    - name: Exécuter la commande uptime
+      ansible.builtin.command: uptime
+      register: resultat_uptime
+
+    - name: Afficher le résultat de la commande uptime
+      ansible.builtin.debug:
+        msg: "Résultat sur {{ inventory_hostname }} : {{ resultat_uptime.stdout }}"

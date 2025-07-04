@@ -1,0 +1,17 @@
+---
+- name: Créer un fichier vide sur tous les clients distants
+  hosts: all
+  become: true
+
+  vars:
+    nom_fichier: "toto"           # Valeur par défaut, override possible en -e
+    repertoire: "/tmp"            # Dossier cible, modifiable si besoin
+
+  tasks:
+    - name: Créer un fichier vide basé sur la variable nom_fichier
+      ansible.builtin.file:
+        path: "{{ repertoire }}/{{ nom_fichier }}.log"
+        state: touch
+        owner: root
+        group: root
+        mode: '0644'

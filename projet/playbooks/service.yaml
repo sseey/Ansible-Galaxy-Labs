@@ -1,0 +1,91 @@
+---
+- name: Tester les états du service apache2/httpd
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    etat_apache: "{{ etat_apache | default('started') }}"
+    pkg: >-
+      {% if ansible_facts.os_family == 'Debian' %}
+        apache2
+      {% elif ansible_facts.os_family in ['RedHat', 'Rocky', 'AlmaLinux'] %}
+        httpd
+      {% else %}
+        apache2
+      {% endif %}
+    svc: >-
+      {% if ansible_facts.os_family == 'Debian' %}
+        apache2
+      {% elif ansible_facts.os_family in ['RedHat', 'Rocky', 'AlmaLinux'] %}
+        httpd
+      {% else %}
+        apache2
+      {% endif %}
+
+  pre_tasks:
+    - name: Installer Apache (Debian/Ubuntu apache2, RedHat/Rocky httpd)
+      ansible.builtin.package:
+        name: "{{ pkg }}"
+        state: present
+      ignore_errors: yes
+
+    - name: Vérifier si le service {{ svc }} existe
+      ansible.builtin.shell: |
+        if service {{ svc }} status > /dev/null 2>&1; then
+          echo "EXISTS"
+        else
+          echo "MISSING"
+        fi
+      register: service_exists
+      changed_when: false
+
+  tasks:
+    - name: Démarrer le service
+      ansible.builtin.service:
+        name: "{{ svc }}"
+        state: started
+      when:
+        - etat_apache == 'started'
+        - '"EXISTS" in service_exists.stdout'
+      tags: start
+
+    - name: Arrêter le service
+      ansible.builtin.service:
+        name: "{{ svc }}"
+        state: stopped
+      when:
+        - etat_apache == 'stopped'
+        - '"EXISTS" in service_exists.stdout'
+      tags: stop
+
+    - name: Redémarrer le service
+      ansible.builtin.service:
+        name: "{{ svc }}"
+        state: restarted
+      when:
+        - etat_apache == 'restarted'
+        - '"EXISTS" in service_exists.stdout'
+      tags: restart
+
+  post_tasks:
+    - name: Vérifier l'état du service via la commande service
+      ansible.builtin.shell: "service {{ svc }} status"
+      register: status_output
+      failed_when: false
+      changed_when: false
+      when: '"EXISTS" in service_exists.stdout'
+      tags: status
+
+    - name: Afficher le statut extrait
+      ansible.builtin.debug:
+        msg: >-
+          {{ svc }} est {{ 'running' if 'running' in status_output.stdout else 'not running' }}
+      when: '"EXISTS" in service_exists.stdout'
+      tags: status
+
+    - name: Indiquer que le service n'existe pas sur ce host
+      ansible.builtin.debug:
+        msg: >-
+          Le service {{ svc }} n'existe pas sur ce host ({{ inventory_hostname }}).
+      when: '"MISSING" in service_exists.stdout'

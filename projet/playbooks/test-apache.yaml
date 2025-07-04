@@ -1,0 +1,11 @@
+---
+- name: Playbook de test apache
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Installer apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: true
