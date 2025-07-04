@@ -1,0 +1,17 @@
+galaxy_info:
+  author: SMAIL Hicham
+  description: Déploie quiz-ansible Node.js sur Debian/Ubuntu et RedHat/Rocky
+  company: SDV
+  license: MIT
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Debian
+      versions: [buster, bullseye, bookworm]
+    - name: Ubuntu
+      versions: [bionic, focal, jammy]
+    - name: RedHat
+      versions: [8]
+    - name: Rocky
+      versions: [8]
+  categories: [web, nodejs]
+dependencies: []

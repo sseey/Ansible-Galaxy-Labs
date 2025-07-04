@@ -1,0 +1,87 @@
+# roles/ansible-role-quiz/tasks/main.yml
+---
+- name: Mettre à jour les paquets (Rocky/RedHat)
+  ansible.builtin.dnf:
+    name: '*'
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Mettre à jour les paquets (Debian/Ubuntu)
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Installer Git et procps-ng (Rocky/RedHat)
+  ansible.builtin.dnf:
+    name:
+      - git
+      - procps-ng
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Installer Git et procps (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name:
+      - git
+      - procps
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Télécharger le script d'installation Node.js 23 (Rocky/RedHat)
+  ansible.builtin.get_url:
+    url: https://rpm.nodesource.com/setup_23.x
+    dest: /tmp/setup_node.sh
+    mode: '0755'
+  when: ansible_os_family == "RedHat"
+
+- name: Télécharger le script d'installation Node.js 23 (Debian/Ubuntu)
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/setup_23.x
+    dest: /tmp/setup_node.sh
+    mode: '0755'
+  when: ansible_os_family == "Debian"
+
+- name: Exécuter le script Node.js
+  ansible.builtin.command: bash /tmp/setup_node.sh
+
+- name: Installer Node.js (Rocky/RedHat)
+  ansible.builtin.dnf:
+    name: nodejs
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Installer Node.js (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Cloner le dépôt de l'application
+  ansible.builtin.git:
+    repo: https://github.com/franklin-tutorials/quiz-ansible.git
+    dest: /opt/quiz-ansible
+    version: HEAD
+
+- name: Installer les dépendances npm
+  ansible.builtin.command: npm install
+  args:
+    chdir: /opt/quiz-ansible
+
+- name: Compiler l'application (build)
+  ansible.builtin.command: npm run build
+  args:
+    chdir: /opt/quiz-ansible
+
+- name: Installer le serveur statique "serve"
+  ansible.builtin.npm:
+    name: serve
+    global: yes
+    state: present
+
+- name: Lancer l'application avec "serve"
+  ansible.builtin.shell: serve -s dist -l 3000
+  args:
+    chdir: /opt/quiz-ansible
+  async: 3600
+  poll: 0

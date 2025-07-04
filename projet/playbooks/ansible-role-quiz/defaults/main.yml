@@ -1,0 +1,24 @@
+---
+repo_url: "https://github.com/franklin-tutorials/quiz-ansible.git"
+app_path: "/opt/quiz-ansible"
+node_version: "23"
+
+base_packages:
+  Debian:
+    - git
+    - curl
+    - gnupg
+    - ca-certificates
+    - lsb-release
+  RedHat:
+    - git
+    - curl
+    - gnupg2
+
+node_source_cmd:
+  Debian: "curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash -"
+  RedHat: "curl -fsSL https://rpm.nodesource.com/setup_{{ node_version }}.x | bash -"
+
+node_source_creates:
+  Debian: "/etc/apt/sources.list.d/nodesource.list"
+  RedHat: "/etc/yum.repos.d/nodesource.repo"

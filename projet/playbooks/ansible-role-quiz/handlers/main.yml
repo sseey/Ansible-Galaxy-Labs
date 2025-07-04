@@ -1,0 +1,6 @@
+---
+
+- name: restart quiz service
+  service:
+    name: quiz-ansible
+    state: restarted

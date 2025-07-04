@@ -1,0 +1,8 @@
+---
+- name: Test du rôle ansible-role-quiz
+  hosts: rocky,ubuntu
+  become: true
+  gather_facts: true
+
+  roles:
+    - ansible-role-quiz

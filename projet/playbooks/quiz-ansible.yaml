@@ -1,43 +1,61 @@
 ---
-- name: Déployer l'application Node.js quiz-ansible sur Rocky Linux via script
+- name: Déployer quiz-ansible sur Rocky
   hosts: rocky
   become: true
-  gather_facts: true
-
-  vars:
-    local_script: scripts/quiz-ansible.sh
-    remote_script: /tmp/quiz-ansible.sh
 
   tasks:
-    - name: Copier le script de déploiement
-      ansible.builtin.copy:
-        src: "{{ local_script }}"
-        dest: "{{ remote_script }}"
+    - name: Mettre à jour les paquets
+      dnf:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: Installer Git et procps-ng
+      dnf:
+        name:
+          - git
+          - procps-ng
+        state: present
+
+    - name: Télécharger le script d'installation Node.js 23
+      get_url:
+        url: https://rpm.nodesource.com/setup_23.x
+        dest: /tmp/setup_node.sh
         mode: '0755'
 
-    - name: Exécuter le script quiz-ansible.sh
-      ansible.builtin.shell: bash "{{ remote_script }}"
+    - name: Exécuter le script Node.js
+      command: bash /tmp/setup_node.sh
+
+    - name: Installer Node.js
+      dnf:
+        name: nodejs
+        state: present
+
+    - name: Cloner le dépôt de l'application
+      git:
+        repo: https://github.com/franklin-tutorials/quiz-ansible.git
+        dest: /opt/quiz-ansible
+        version: HEAD
+
+    - name: Installer les dépendances npm
+      command: npm install
       args:
-        creates: /opt/quiz-ansible
-      register: deploy_run
-      changed_when: deploy_run.rc == 0
+        chdir: /opt/quiz-ansible
 
-    - name: Attendre que l'application écoute sur 127.0.0.1:3000
-      ansible.builtin.wait_for:
-        host: 127.0.0.1
-        port: 3000
-        delay: 5
-        timeout: 120
-      register: wait_app
-      ignore_errors: yes
+    - name: Compiler l'application (build)
+      command: npm run build
+      args:
+        chdir: /opt/quiz-ansible
 
-    - name: Afficher les 20 dernières lignes du log en cas d’échec
-      ansible.builtin.shell: tail -n 20 /tmp/quiz-ansible.log
-      register: last_logs
-      when: wait_app is failed
-      changed_when: false
+    - name: Installer le serveur statique "serve"
+      npm:
+        name: serve
+        global: yes
+        state: present
 
-    - name: Debug du log (si échec)
-      ansible.builtin.debug:
-        var: last_logs.stdout_lines
-      when: wait_app is failed
+    - name: Lancer l'application avec "serve"
+      shell: serve -s dist -l 3000
+      args:
+        chdir: /opt/quiz-ansible
+      async: 3600
+      poll: 0
