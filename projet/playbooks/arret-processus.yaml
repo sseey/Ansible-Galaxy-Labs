@@ -1,0 +1,52 @@
+---
+- name: Arrêter (ou démarrer+arrêter) les processus `sleep` sur client1
+  hosts: client1
+  become: true
+  gather_facts: true
+
+  tasks:
+    # 1) Installer pgrep/pkill si besoin (procps contient pgrep, pkill)
+    - name: Installer procps (pour pgrep/pkill)
+      ansible.builtin.apt:
+        name: procps
+        state: present
+        update_cache: yes
+
+    # 2) Rechercher s’il y a déjà un sleep en cours
+    - name: Rechercher les PID du binaire sleep
+      ansible.builtin.shell: pgrep -x sleep
+      register: process_encours
+      ignore_errors: yes
+      changed_when: false
+
+    # 3) Si aucun sleep existant, en lancer un en arrière-plan
+    - name: Démarrer un processus sleep en arrière-plan
+      ansible.builtin.shell: nohup sleep 5000 > /tmp/sleep.log 2>&1 &
+      register: start_sleep
+      changed_when: true
+      when: process_encours.rc != 0
+
+    - name: Attendre que le nouveau sleep démarre
+      ansible.builtin.pause:
+        seconds: 1
+      when: process_encours.rc != 0
+
+    # 4) Tuer tous les sleep, qu’ils existaient ou qu’on les ait lancés
+    - name: Tuer tous les processus sleep
+      ansible.builtin.shell: pkill -x sleep
+      register: kill_res
+      ignore_errors: yes
+      changed_when: kill_res.rc == 0
+
+    # 5) Afficher le résultat final
+    - name: Confirmation finale
+      ansible.builtin.debug:
+        msg: >-
+          {% if process_encours.rc != 0 %}
+            Sleep démarré par Ansible puis…
+          {% endif %}
+          {% if kill_res.rc == 0 %}
+            Processus sleep arrêtés avec succès.
+          {% else %}
+            Aucun processus sleep n’a été tué (ils avaient déjà disparu).
+          {% endif %}

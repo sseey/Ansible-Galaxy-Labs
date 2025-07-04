@@ -1,0 +1,19 @@
+---
+- name: Installer nginx selon la famille d'OS
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Installer nginx sur Debian/Ubuntu
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Installer nginx sur RedHat ou SUSE
+      ansible.builtin.yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat" or ansible_os_family == "Suse"

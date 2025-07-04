@@ -1,101 +1,43 @@
 ---
-- name: Déployer l'application Node.js quiz-ansible sur Rocky Linux
+- name: Déployer l'application Node.js quiz-ansible sur Rocky Linux via script
   hosts: rocky
   become: true
   gather_facts: true
 
   vars:
-    repo_url: "https://github.com/franklin-tutorials/quiz-ansible.git"
-    repo_dest: "/opt/quiz-ansible"
+    local_script: scripts/quiz-ansible.sh
+    remote_script: /tmp/quiz-ansible.sh
 
   tasks:
-    - name: Mettre à jour les paquets
-      ansible.builtin.dnf:
-        name: "*"
-        state: latest
-        update_cache: yes
+    - name: Copier le script de déploiement
+      ansible.builtin.copy:
+        src: "{{ local_script }}"
+        dest: "{{ remote_script }}"
+        mode: '0755'
 
-    - name: Désinstaller curl-minimal si présent
-      ansible.builtin.dnf:
-        name: curl-minimal
-        state: absent
-
-    - name: Installer git et curl (full)
-      ansible.builtin.dnf:
-        name:
-          - git
-          - curl
-        state: present
-
-    - name: Télécharger le script d'installation Node.js
-      ansible.builtin.get_url:
-        url: "https://rpm.nodesource.com/setup_23.x"
-        dest: "/tmp/setup_23.sh"
-        mode: "0755"
-
-    - name: Exécuter le script d'installation Node.js
-      ansible.builtin.command: bash /tmp/setup_23.sh
+    - name: Exécuter le script quiz-ansible.sh
+      ansible.builtin.shell: bash "{{ remote_script }}"
       args:
-        creates: /etc/yum.repos.d/nodesource*
+        creates: /opt/quiz-ansible
+      register: deploy_run
+      changed_when: deploy_run.rc == 0
 
-    - name: Installer Node.js
-      ansible.builtin.dnf:
-        name: nodejs
-        state: present
-
-    - name: Cloner le dépôt Git quiz-ansible
-      ansible.builtin.git:
-        repo: "{{ repo_url }}"
-        dest: "{{ repo_dest }}"
-        update: yes
-        force: yes
-
-    - name: Installer les dépendances npm
-      ansible.builtin.command: npm install
-      args:
-        chdir: "{{ repo_dest }}"
-      environment:
-        PATH: "/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-
-    - name: Compiler l'app avec npm run build
-      ansible.builtin.command: npm run build
-      args:
-        chdir: "{{ repo_dest }}"
-      environment:
-        PATH: "/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-
-    - name: Installer serve en global avec npm
-      ansible.builtin.command: npm install -g serve
-      environment:
-        PATH: "/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-
-    - name: Lancer l'app en tâche de fond (sur toutes interfaces)
-      ansible.builtin.shell: "nohup serve -s dist -l 0.0.0.0:3000 > /tmp/quiz-ansible.log 2>&1 &"
-      args:
-        chdir: "{{ repo_dest }}"
-      environment:
-        PATH: "/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-      async: 0
-      poll: 0
-      register: background_job
-      changed_when: false
-
-    - name: Attendre que l'app écoute sur le port 3000
+    - name: Attendre que l'application écoute sur 127.0.0.1:3000
       ansible.builtin.wait_for:
+        host: 127.0.0.1
         port: 3000
-        host: "0.0.0.0"
-        delay: 10
-        timeout: 300
-      register: wait_result
+        delay: 5
+        timeout: 120
+      register: wait_app
       ignore_errors: yes
 
-    - name: Afficher le log en cas d’échec de démarrage
+    - name: Afficher les 20 dernières lignes du log en cas d’échec
       ansible.builtin.shell: tail -n 20 /tmp/quiz-ansible.log
       register: last_logs
-      when: wait_result is failed
-      ignore_errors: yes
+      when: wait_app is failed
+      changed_when: false
 
     - name: Debug du log (si échec)
       ansible.builtin.debug:
         var: last_logs.stdout_lines
-      when: wait_result is failed
+      when: wait_app is failed

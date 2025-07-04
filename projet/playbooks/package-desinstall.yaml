@@ -1,0 +1,26 @@
+---
+- name: Désinstaller telnet, curl et wget sur tous les hôtes
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    packages_to_remove:
+      - telnet
+      - curl
+      - wget
+
+  tasks:
+    - name: Désinstaller les paquets sur Debian/Ubuntu
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ packages_to_remove }}"
+      when: ansible_os_family == "Debian"
+
+    - name: Désinstaller les paquets sur RedHat/Rocky
+      ansible.builtin.yum:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ packages_to_remove }}"
+      when: ansible_os_family == "RedHat"

@@ -1,0 +1,41 @@
+---
+- name: Mettre à jour index.html et redémarrer Apache en cas de modification
+  hosts: ubuntu
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Installer Apache2 si nécessaire
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: S’assurer qu’Apache2 est démarré et activé
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Créer le répertoire /var/www/html
+      ansible.builtin.file:
+        path: /var/www/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Copier la page d'accueil personnalisée
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify: Redémarrer Apache
+
+  handlers:
+    - name: Redémarrer Apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
